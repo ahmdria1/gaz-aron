@@ -16,6 +16,7 @@ create table if not exists profiles (
   phone text,
   email text,
   city_id uuid references cities,
+  city_name text,
   loyalty_points int default 0,
   role text default 'user' check (role in ('user', 'admin')),
   created_at timestamptz default now()
@@ -53,6 +54,19 @@ create table if not exists order_items (
   quantity int default 1,
   price numeric not null,
   is_exchange boolean default false
+);
+
+-- Deliveries (Tracking)
+create table if not exists deliveries (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid references orders,
+  driver_name text,
+  driver_phone text,
+  status text default 'pending',
+  current_location text,
+  latitude numeric,
+  longitude numeric,
+  updated_at timestamptz default now()
 );
 
 -- Ratings
@@ -100,8 +114,9 @@ alter table orders enable row level security;
 alter table order_items enable row level security;
 alter table ratings enable row level security;
 alter table notifications enable row level security;
+alter table deliveries enable row level security;
 
--- Basic policies (expand as needed)
+-- Basic policies
 create policy "Users can view own profile" on profiles for select using (auth.uid() = id);
 create policy "Users can update own profile" on profiles for update using (auth.uid() = id);
 create policy "Users can view own orders" on orders for select using (auth.uid() = user_id);
