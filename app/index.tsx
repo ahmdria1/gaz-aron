@@ -1,31 +1,12 @@
-import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { supabase } from '../lib/supabase';
 import { ProductCard } from '../components/ProductCard';
+import { useProducts } from '../hooks/useProducts';
 import { colors } from '../theme/colors';
-import type { Product } from '../types';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  async function fetchProducts() {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true);
-
-    if (!error && data) {
-      setProducts(data as Product[]);
-    }
-    setLoading(false);
-  }
+  const { products, loading, error } = useProducts();
 
   return (
     <View style={styles.container}>
@@ -42,6 +23,8 @@ export default function HomeScreen() {
 
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary} />
+        ) : error ? (
+          <Text style={styles.empty}>حدث خطأ في جلب المنتجات</Text>
         ) : products.length === 0 ? (
           <Text style={styles.empty}>لا توجد منتجات متاحة حالياً</Text>
         ) : (
