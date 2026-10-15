@@ -17,21 +17,26 @@ export async function createOrder({
   paymentMethod,
   isExchange = false,
 }: CreateOrderParams) {
-  // جلب بيانات المنتج
+  // Validation
+  if (!userId) return { error: new Error('المستخدم غير مسجل') };
+  if (!productId) return { error: new Error('المنتج غير محدد') };
+  if (quantity < 1) return { error: new Error('الكمية يجب أن تكون 1 على الأقل') };
+
+  // جلب بيانات المنتج من قاعدة البيانات (منع التلاعب بالسعر)
   const { data: product, error: productError } = await supabase
     .from('products')
     .select('*')
     .eq('id', productId)
+    .eq('is_active', true)
     .single();
 
   if (productError || !product) {
-    return { error: productError || new Error('Product not found') };
+    return { error: productError || new Error('المنتج غير متاح') };
   }
 
   const deliveryFee = 5;
   const totalAmount = product.price * quantity + deliveryFee;
 
-  // إنشاء الطلب
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -48,7 +53,6 @@ export async function createOrder({
     return { error: orderError };
   }
 
-  // إضافة تفاصيل الطلب
   await supabase.from('order_items').insert({
     order_id: order.id,
     product_id: productId,
@@ -57,10 +61,8 @@ export async function createOrder({
     is_exchange: isExchange,
   });
 
-  // إضافة نقاط ولاء (10 نقاط لكل طلب)
   await addLoyaltyPoints(userId, 10, 'order', order.id);
 
-  // إنشاء إشعار
   await createNotification(
     userId,
     'تم استلام طلبك',
