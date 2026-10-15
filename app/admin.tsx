@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { Header } from '../components/Header';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import { colors } from '../theme/colors';
 import type { Product, Order, City } from '../types';
 
@@ -14,19 +15,8 @@ export default function AdminScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAdmin();
     fetchData();
   }, []);
-
-  async function checkAdmin() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    if (data?.role !== 'admin') {
-      Alert.alert('غير مصرح', 'ليس لديك صلاحية الوصول');
-    }
-  }
 
   async function fetchData() {
     setLoading(true);
@@ -47,57 +37,59 @@ export default function AdminScreen() {
   }
 
   return (
-    <ScreenContainer>
-      <Header title="لوحة التحكم" showBack />
-      <View style={styles.tabs}>
-        <TouchableOpacity onPress={() => setTab('products')} style={[styles.tab, tab === 'products' && styles.activeTab]}>
-          <Text style={styles.tabText}>المنتجات</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setTab('orders')} style={[styles.tab, tab === 'orders' && styles.activeTab]}>
-          <Text style={styles.tabText}>الطلبات</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setTab('cities')} style={[styles.tab, tab === 'cities' && styles.activeTab]}>
-          <Text style={styles.tabText}>المدن</Text>
-        </TouchableOpacity>
-      </View>
+    <ProtectedRoute requireAdmin>
+      <ScreenContainer>
+        <Header title="لوحة التحكم" showBack />
+        <View style={styles.tabs}>
+          <TouchableOpacity onPress={() => setTab('products')} style={[styles.tab, tab === 'products' && styles.activeTab]}>
+            <Text style={styles.tabText}>المنتجات</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setTab('orders')} style={[styles.tab, tab === 'orders' && styles.activeTab]}>
+            <Text style={styles.tabText}>الطلبات</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setTab('cities')} style={[styles.tab, tab === 'cities' && styles.activeTab]}>
+            <Text style={styles.tabText}>المدن</Text>
+          </TouchableOpacity>
+        </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-      ) : tab === 'products' ? (
-        <FlatList
-          data={products}
-          keyExtractor={(i) => i.id}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.title}>{item.name}</Text>
-              <Text style={styles.sub}>⃁ {item.price}</Text>
-            </View>
-          )}
-        />
-      ) : tab === 'orders' ? (
-        <FlatList
-          data={orders}
-          keyExtractor={(i) => i.id}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.title}>الحالة: {item.status}</Text>
-              <Text style={styles.sub}>⃁ {item.total_amount}</Text>
-            </View>
-          )}
-        />
-      ) : (
-        <FlatList
-          data={cities}
-          keyExtractor={(i) => i.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => toggleCity(item.id, item.is_active)}>
-              <Text style={styles.title}>{item.name}</Text>
-              <Text style={styles.sub}>{item.is_active ? 'نشطة' : 'موقوفة'}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
-    </ScreenContainer>
+        {loading ? (
+          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+        ) : tab === 'products' ? (
+          <FlatList
+            data={products}
+            keyExtractor={(i) => i.id}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.title}>{item.name}</Text>
+                <Text style={styles.sub}>⃁ {item.price}</Text>
+              </View>
+            )}
+          />
+        ) : tab === 'orders' ? (
+          <FlatList
+            data={orders}
+            keyExtractor={(i) => i.id}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.title}>الحالة: {item.status}</Text>
+                <Text style={styles.sub}>⃁ {item.total_amount}</Text>
+              </View>
+            )}
+          />
+        ) : (
+          <FlatList
+            data={cities}
+            keyExtractor={(i) => i.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.card} onPress={() => toggleCity(item.id, item.is_active)}>
+                <Text style={styles.title}>{item.name}</Text>
+                <Text style={styles.sub}>{item.is_active ? 'نشطة' : 'موقوفة'}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </ScreenContainer>
+    </ProtectedRoute>
   );
 }
 
