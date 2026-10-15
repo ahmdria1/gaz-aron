@@ -1,24 +1,28 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { ScreenContainer } from '../components/ScreenContainer';
+import { Header } from '../components/Header';
+import { colors } from '../theme/colors';
 
 export default function TermsScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>الشروط والأحكام</Text>
-      </View>
+    <ScreenContainer>
+      <Header title="الشروط والأحكام" showBack />
       <ScrollView style={styles.content}>
         <Text style={styles.text}>
-          مرحباً بك في غاز أرون. باستخدام التطبيق توافق على الشروط التالية...
+          مرحباً بك في غاز أرون.\n\n
+          باستخدام هذا التطبيق توافق على الشروط والأحكام التالية:\n\n
+          1. الطلبات تخضع للتوفر في المدينة المحددة.\n
+          2. رسوم التوصيل 5 ⃁.\n
+          3. يمكن الدفع إلكترونياً أو عند الاستلام.\n
+          4. نقاط الولاء تُحسب حسب سياسة المتجر.\n\n
+          للاستفسار: تواصل معنا من خلال التطبيق.
         </Text>
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  header: { height: 100, backgroundColor: '#3880C7', justifyContent: 'center', paddingHorizontal: 24 },
-  title: { color: '#FFFFFF', fontSize: 24, fontWeight: '700' },
   content: { padding: 24 },
-  text: { fontSize: 16, lineHeight: 24, color: '#2E333D' },
+  text: { fontSize: 16, lineHeight: 26, color: colors.text },
 });
