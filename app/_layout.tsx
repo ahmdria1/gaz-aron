@@ -17,6 +17,7 @@ export default function RootLayout() {
       <Stack.Screen name="contact" />
       <Stack.Screen name="terms" />
       <Stack.Screen name="admin" />
+      <Stack.Screen name="notifications" />
     </Stack>
   );
 }
