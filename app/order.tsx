@@ -2,17 +2,23 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../lib/supabase';
+import { createOrder } from '../services/orders';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { Header } from '../components/Header';
 import { colors } from '../theme/colors';
 
 export default function OrderScreen() {
-  const { productId } = useLocalSearchParams();
+  const { productId } = useLocalSearchParams<{ productId: string }>();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const deliveryFee = 5;
 
   async function placeOrder() {
+    if (!productId) {
+      Alert.alert('خطأ', 'لم يتم تحديد المنتج');
+      return;
+    }
+
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -23,12 +29,10 @@ export default function OrderScreen() {
       return;
     }
 
-    const { error } = await supabase.from('orders').insert({
-      user_id: user.id,
-      status: 'pending',
-      payment_method: 'cash_on_delivery',
-      total_amount: 33,
-      delivery_fee: deliveryFee,
+    const { error } = await createOrder({
+      userId: user.id,
+      productId,
+      paymentMethod: 'cash_on_delivery',
     });
 
     setLoading(false);
@@ -37,7 +41,7 @@ export default function OrderScreen() {
       Alert.alert('خطأ', 'فشل إنشاء الطلب');
     } else {
       Alert.alert('نجاح', 'تم إنشاء الطلب بنجاح');
-      router.push('/tracking');
+      router.replace('/tracking');
     }
   }
 
