@@ -1,22 +1,49 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '../lib/supabase';
+import { getLoyaltyPoints } from '../services/loyalty';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { Header } from '../components/Header';
 import { colors } from '../theme/colors';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [points, setPoints] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPoints();
+  }, []);
+
+  async function loadPoints() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const p = await getLoyaltyPoints(user.id);
+      setPoints(p);
+    }
+    setLoading(false);
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace('/login');
+  }
 
   return (
     <ScreenContainer>
       <Header title="الحساب" />
       <View style={styles.content}>
         <Text style={styles.label}>نقاط الولاء</Text>
-        <Text style={styles.points}>120</Text>
+        {loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          <Text style={styles.points}>{points}</Text>
+        )}
         <TouchableOpacity style={styles.item} onPress={() => router.push('/tracking')}>
           <Text style={styles.itemText}>سجل الطلبات</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.item} onPress={() => router.push('/login')}>
+        <TouchableOpacity style={styles.item} onPress={handleLogout}>
           <Text style={styles.itemText}>تسجيل الخروج</Text>
         </TouchableOpacity>
       </View>
