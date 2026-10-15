@@ -23,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="terms" />
           <Stack.Screen name="admin" />
           <Stack.Screen name="notifications" />
+          <Stack.Screen name="rating" />
         </Stack>
       </AuthProvider>
     </ErrorBoundary>
