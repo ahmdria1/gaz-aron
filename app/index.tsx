@@ -1,8 +1,35 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '../lib/supabase';
+
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  size_kg: number;
+};
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  async function fetchProducts() {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true);
+
+    if (!error && data) {
+      setProducts(data);
+    }
+    setLoading(false);
+  }
 
   return (
     <View style={styles.container}>
@@ -12,25 +39,29 @@ export default function HomeScreen() {
           <Text style={styles.headerLink}>الحساب</Text>
         </TouchableOpacity>
       </View>
+
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.welcome}>مرحباً بك في غاز أرون</Text>
         <Text style={styles.subtitle}>اطلب أسطوانة غاز أو استبدل فارغتك</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.productName}>أسطوانة 12 كجم</Text>
-          <Text style={styles.price}>⃁ 28</Text>
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/order')}>
-            <Text style={styles.buttonText}>اطلب</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.productName}>أسطوانة 25 كجم</Text>
-          <Text style={styles.price}>⃁ 45</Text>
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/order')}>
-            <Text style={styles.buttonText}>اطلب</Text>
-          </TouchableOpacity>
-        </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#3880C7" />
+        ) : products.length === 0 ? (
+          <Text style={styles.empty}>لا توجد منتجات متاحة حالياً</Text>
+        ) : (
+          products.map((product) => (
+            <View key={product.id} style={styles.card}>
+              <Text style={styles.productName}>{product.name}</Text>
+              <Text style={styles.price}>⃁ {product.price}</Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push({ pathname: '/order', params: { productId: product.id } })}
+              >
+                <Text style={styles.buttonText}>اطلب</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
 
         <View style={styles.links}>
           <TouchableOpacity onPress={() => router.push('/contact')}>
@@ -60,4 +91,5 @@ const styles = StyleSheet.create({
   buttonText: { color: '#FFFFFF', fontWeight: '600' },
   links: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 32 },
   link: { color: '#3880C7', fontSize: 16 },
+  empty: { textAlign: 'center', color: '#666', marginTop: 40 },
 });
