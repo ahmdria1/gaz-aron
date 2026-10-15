@@ -7,19 +7,22 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#1A386B"
+      "backgroundColor": "#3880C7"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gazaron.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#1A386B"
-      }
+        "backgroundColor": "#3880C7"
+      },
+      "package": "com.gazaron.app"
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "static"
     }
   }
 }
