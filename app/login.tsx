@@ -1,13 +1,55 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 export default function LoginScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert('خطأ', 'يرجى إدخال البريد وكلمة المرور');
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('خطأ', error.message);
+    } else {
+      router.replace('/');
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>تسجيل الدخول</Text>
-      <TextInput style={styles.input} placeholder="البريد الإلكتروني" keyboardType="email-address" />
-      <TextInput style={styles.input} placeholder="كلمة المرور" secureTextEntry />
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>دخول</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="البريد الإلكتروني"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="كلمة المرور"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>دخول</Text>
+        )}
       </TouchableOpacity>
       <Text style={styles.link}>ليس لديك حساب؟ أنشئ حساباً</Text>
     </View>
