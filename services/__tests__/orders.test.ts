@@ -18,6 +18,7 @@ describe('createOrder', () => {
       paymentMethod: 'cash_on_delivery',
     });
     expect(result.error).toBeDefined();
+    expect(result.error?.message).toBe('المنتج مطلوب');
   });
 
   it('rejects zero quantity', async () => {
@@ -29,11 +30,20 @@ describe('createOrder', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('rejects negative quantity', async () => {
+  it('rejects negative quantity with Zod message', async () => {
     const result = await createOrder({
       productId: 'p1',
       quantity: -1,
       paymentMethod: 'cash_on_delivery',
+    });
+    expect(result.error).toBeDefined();
+    expect(result.error?.message).toContain('الكمية');
+  });
+
+  it('rejects invalid payment method', async () => {
+    const result = await createOrder({
+      productId: 'p1',
+      paymentMethod: 'invalid' as any,
     });
     expect(result.error).toBeDefined();
   });
