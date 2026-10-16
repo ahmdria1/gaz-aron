@@ -1,20 +1,18 @@
 import { supabase } from '../lib/supabase';
+import { validateOrder } from '../utils/validation';
 
-type CreateOrderParams = {
+export async function createOrder(input: {
   productId: string;
   quantity?: number;
   paymentMethod: 'electronic' | 'cash_on_delivery';
   isExchange?: boolean;
-};
+}) {
+  const result = validateOrder(input);
+  if (!result.success) {
+    return { error: new Error(result.error.issues[0].message) };
+  }
 
-export async function createOrder({
-  productId,
-  quantity = 1,
-  paymentMethod,
-  isExchange = false,
-}: CreateOrderParams) {
-  if (!productId) return { error: new Error('المنتج غير محدد') };
-  if (quantity < 1) return { error: new Error('الكمية يجب أن تكون 1 على الأقل') };
+  const { productId, quantity, paymentMethod, isExchange } = result.data;
 
   const { data, error } = await supabase.rpc('create_order', {
     p_product_id: productId,
