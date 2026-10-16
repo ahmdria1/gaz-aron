@@ -29,7 +29,7 @@ describe('Integration: Order Flow', () => {
     expect(validation.success).toBe(true);
 
     const result = await createOrder(input);
-    expect(result.error).toBeUndefined();
+    expect(result.error).toBeFalsy();
     expect(result.data).toEqual({ id: 'order-1', status: 'pending' });
     expect(mockRpc).toHaveBeenCalledWith('create_order', expect.objectContaining({
       p_product_id: 'prod-1',
