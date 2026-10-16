@@ -6,27 +6,40 @@
     "orientation": "portrait",
     "scheme": "gazaron",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#3880C7"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.gazaron.app",
+      "buildNumber": "1",
+      "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "نحتاج موقعك لتحديد مدينة التوصيل"
+        "NSLocationWhenInUseUsageDescription": "نحتاج موقعك لتحديد مدينة التوصيل",
+        "CFBundleDevelopmentRegion": "ar"
       }
     },
     "android": {
+      "package": "com.gazaron.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#3880C7"
       },
-      "package": "com.gazaron.app",
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
       "expo-router",
-      "expo-location"
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "نحتاج موقعك لتحديد عنوان التوصيل"
+        }
+      ]
     ],
     "web": {
       "bundler": "metro",
