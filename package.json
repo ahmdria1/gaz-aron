@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -18,7 +19,8 @@
     "expo-router": "~4.0.0",
     "react": "18.3.1",
     "react-native": "0.76.5",
-    "react-native-web": "~0.19.13"
+    "react-native-web": "~0.19.13",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@testing-library/react-native": "^12.7.2",
