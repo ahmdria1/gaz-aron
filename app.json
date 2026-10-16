@@ -4,6 +4,7 @@
     "slug": "gaz-aron",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "gazaron",
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#3880C7"
@@ -11,14 +12,22 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gazaron.app"
+      "bundleIdentifier": "com.gazaron.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "نحتاج موقعك لتحديد مدينة التوصيل"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#3880C7"
       },
-      "package": "com.gazaron.app"
+      "package": "com.gazaron.app",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
+    "plugins": [
+      "expo-router",
+      "expo-location"
+    ],
     "web": {
       "bundler": "metro",
       "output": "static"
