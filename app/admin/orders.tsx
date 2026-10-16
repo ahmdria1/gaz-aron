@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -7,19 +7,47 @@ import { ProtectedRoute } from '../../components/ProtectedRoute';
 import { colors } from '../../theme/colors';
 import type { Order } from '../../types';
 
+const PAGE_SIZE = 20;
+
 export default function AdminOrdersScreen() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetchOrders();
+  const fetchOrders = useCallback(async (pageNum: number, refresh = false) => {
+    if (pageNum === 0) setLoading(true);
+    else setLoadingMore(true);
+
+    const from = pageNum * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data } = await supabase
+      .from('orders')
+      .select('id, status, total_amount, created_at')
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (data) {
+      setOrders(prev => refresh ? data as Order[] : [...prev, ...data as Order[]]);
+      setHasMore(data.length === PAGE_SIZE);
+    }
+
+    setLoading(false);
+    setLoadingMore(false);
   }, []);
 
-  async function fetchOrders() {
-    setLoading(true);
-    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (data) setOrders(data as Order[]);
-    setLoading(false);
+  useEffect(() => {
+    fetchOrders(0, true);
+  }, [fetchOrders]);
+
+  function loadMore() {
+    if (!loadingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchOrders(nextPage);
+    }
   }
 
   async function cancelOrder(id: string) {
@@ -30,7 +58,7 @@ export default function AdminOrdersScreen() {
         style: 'destructive',
         onPress: async () => {
           await supabase.from('orders').update({ status: 'cancelled' }).eq('id', id);
-          fetchOrders();
+          fetchOrders(0, true);
         },
       },
     ]);
@@ -38,7 +66,7 @@ export default function AdminOrdersScreen() {
 
   async function updateStatus(id: string, status: string) {
     await supabase.from('orders').update({ status }).eq('id', id);
-    fetchOrders();
+    fetchOrders(0, true);
   }
 
   return (
@@ -52,6 +80,9 @@ export default function AdminOrdersScreen() {
             data={orders}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.primary} /> : null}
             renderItem={({ item }) => (
               <View style={styles.card}>
                 <Text style={styles.status}>الحالة: {item.status}</Text>
