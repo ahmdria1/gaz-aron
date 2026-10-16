@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { validateOrder } from '../utils/validation';
+import { sanitizeInput } from '../utils/security';
 
 export async function createOrder(input: {
   productId: string;
@@ -7,7 +8,12 @@ export async function createOrder(input: {
   paymentMethod: 'electronic' | 'cash_on_delivery';
   isExchange?: boolean;
 }) {
-  const result = validateOrder(input);
+  const sanitized = {
+    ...input,
+    productId: sanitizeInput(input.productId),
+  };
+
+  const result = validateOrder(sanitized);
   if (!result.success) {
     return { error: new Error(result.error.issues[0].message) };
   }
