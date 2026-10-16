@@ -43,6 +43,20 @@
         {
           "locationAlwaysAndWhenInUsePermission": "نحتاج موقعك لتحديد عنوان التوصيل"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#3880C7"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "backgroundColor": "#3880C7",
+          "imageWidth": 200
+        }
       ]
     ],
     "web": {
