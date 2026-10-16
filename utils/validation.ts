@@ -11,7 +11,7 @@ export const priceSchema = z.number().positive('السعر يجب أن يكون 
 export const quantitySchema = z.number().int().min(1, 'الكمية يجب أن تكون 1 على الأقل');
 
 export const orderSchema = z.object({
-  productId: z.string().min(1, 'المنتج مطلوب'),
+  productId: z.string().trim().min(1, 'المنتج مطلوب'),
   quantity: quantitySchema.default(1),
   paymentMethod: z.enum(['electronic', 'cash_on_delivery']),
   isExchange: z.boolean().default(false),
