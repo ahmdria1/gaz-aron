@@ -1,10 +1,12 @@
 import { Stack } from 'expo-router';
 import { AuthProvider } from '../context/AuthContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { SEO } from '../components/SEO';
 
 export default function RootLayout() {
   return (
     <ErrorBoundary>
+      <SEO />
       <AuthProvider>
         <Stack
           screenOptions={{
