@@ -30,7 +30,6 @@ export default function OrderScreen() {
     }
 
     const { error } = await createOrder({
-      userId: user.id,
       productId,
       paymentMethod: 'cash_on_delivery',
     });
