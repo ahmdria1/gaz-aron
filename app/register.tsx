@@ -45,30 +45,22 @@ export default function RegisterScreen() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    // Profile is created automatically by database trigger
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName, phone },
+        data: { full_name: fullName, phone, city_name: location },
       },
     });
 
+    setLoading(false);
+
     if (error) {
       Alert.alert('خطأ', error.message);
-      setLoading(false);
       return;
     }
 
-    if (data.user) {
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        full_name: fullName,
-        phone,
-        city_name: location,
-      });
-    }
-
-    setLoading(false);
     Alert.alert('نجاح', 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني');
     router.replace('/login');
   }
