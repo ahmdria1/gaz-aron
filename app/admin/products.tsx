@@ -20,21 +20,29 @@ export default function AdminProductsScreen() {
 
   async function fetchProducts() {
     setLoading(true);
-    const { data } = await supabase.from('products').select('*');
+    const { data } = await supabase.from('products').select('id, name, price, size_kg, is_active');
     if (data) setProducts(data as Product[]);
     setLoading(false);
   }
 
   async function addProduct() {
-    if (!name || !price) {
-      Alert.alert('خطأ', 'أدخل الاسم والسعر');
+    const parsedPrice = parseFloat(price);
+    const parsedSize = sizeKg ? parseFloat(sizeKg) : null;
+
+    if (!name.trim()) {
+      Alert.alert('خطأ', 'أدخل اسم المنتج');
+      return;
+    }
+
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      Alert.alert('خطأ', 'أدخل سعراً صحيحاً');
       return;
     }
 
     const { error } = await supabase.from('products').insert({
-      name,
-      price: parseFloat(price),
-      size_kg: sizeKg ? parseFloat(sizeKg) : null,
+      name: name.trim(),
+      price: parsedPrice,
+      size_kg: parsedSize && !isNaN(parsedSize) ? parsedSize : null,
       is_active: true,
     });
 
@@ -46,13 +54,6 @@ export default function AdminProductsScreen() {
       setSizeKg('');
       fetchProducts();
     }
-  }
-
-  async function updatePrice(id: string, newPrice: string) {
-    const price = parseFloat(newPrice);
-    if (isNaN(price)) return;
-    await supabase.from('products').update({ price }).eq('id', id);
-    fetchProducts();
   }
 
   async function toggleActive(id: string, current: boolean) {
